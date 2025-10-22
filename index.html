@@ -389,11 +389,12 @@ class PatternMatcher {
             return { prediction: null, analysisText: `Cần ít nhất ${this.MIN_HISTORY_FOR_ANALYSIS} kết quả...`, confidence: 0, isCertain: false };
         }
         
+        // THÊM MỚI: Lấy bộ lọc thời gian hiện tại
         const filteredSessions = filterSessionsByDays(allHistoricalSessions, state.dataTimeFilter);
 
         if (optimalLength && currentHistory.length >= optimalLength) {
             const pattern = currentHistory.slice(-optimalLength);
-            const result = this.getPredictionForPattern(pattern, filteredSessions); 
+            const result = this.getPredictionForPattern(pattern, filteredSessions); // Sử dụng filteredSessions
             if (result.prediction) {
                 const perf = lengthPerformance[optimalLength] || { wins: 0, total: 0 };
                 
@@ -409,7 +410,7 @@ class PatternMatcher {
                 };
             }
         }
-        const certainPrediction = this.findCertainPrediction(currentHistory, filteredSessions); 
+        const certainPrediction = this.findCertainPrediction(currentHistory, filteredSessions); // Sử dụng filteredSessions
         if (certainPrediction) {
              certainPrediction.analysisText = `Tìm thấy ${certainPrediction.occurrencesLength || this.MIN_CERTAIN_OCCURRENCES} lần xuất hiện chính xác của hình cầu này trong lịch sử (${state.dataTimeFilter === 'all' ? 'tất cả' : `${state.dataTimeFilter} ngày`}).\nTất cả đều cho kết quả tiếp theo là: ${certainPrediction.prediction}`;
              return certainPrediction;
@@ -418,10 +419,10 @@ class PatternMatcher {
         const allMatches = [];
         for (let len = Math.min(this.MAX_PATTERN_LENGTH, currentHistory.length); len >= this.MIN_PATTERN_LENGTH; len--) {
             const pattern = currentHistory.slice(-len);
-            const occurrences = this.findPatternOccurrences(pattern, filteredSessions); 
+            const occurrences = this.findPatternOccurrences(pattern, filteredSessions); // Sử dụng filteredSessions
             if (occurrences.length > 0) {
                 allMatches.push(...occurrences);
-                break; 
+                break; // Tìm thấy mẫu dài nhất, dừng lại
             }
         }
         if (allMatches.length === 0) return { prediction: null, analysisText: `Không tìm thấy hình cầu tương tự trong ${state.dataTimeFilter === 'all' ? 'tất cả' : `${state.dataTimeFilter} ngày`} lịch sử.`, confidence: 0, isCertain: false };
@@ -787,7 +788,7 @@ function updateConfidenceStatsUI() {
             worstRange = range;
         }
 
-        const currentSessionPredictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (range.max === 100 && p.confidence >= 100)));
+        const currentSessionPredictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (p.confidence === 100 && range.max === 100)));
         let trendIndicator = '', streak = 0;
         if (currentSessionPredictionsForRange.length >= 1) {
             const lastWin = (currentSessionPredictionsForRange.slice(-1)[0].predicted === currentSessionPredictionsForRange.slice(-1)[0].actual);
@@ -830,19 +831,19 @@ function updateConfidenceStatsUI() {
             }
 
             let indicatorsHTML = '';
-             if (currentConfidence && state.currentFinalPrediction?.prediction && currentConfidence >= range.min && (currentConfidence < range.max || (range.max === 100 && currentConfidence >= 100))) {
+             if (currentConfidence && state.currentFinalPrediction?.prediction && currentConfidence >= range.min && (currentConfidence < range.max || (currentConfidence === 100 && range.max === 100))) {
                 const finalPrediction = state.currentFinalPrediction.prediction;
                 const sideText = finalPrediction === 'P' ? 'PLAYER' : 'BANKER';
                 const sideColor = finalPrediction === 'P' ? 'bg-blue-600' : 'bg-red-600';
                 indicatorsHTML += `<span class="ml-2 px-1.5 py-0.5 text-xs rounded font-semibold ${sideColor} text-white" title="Đề xuất ván hiện tại">${sideText}</span>`;
             }
-            if (previousConfidence && previousConfidence >= range.min && (previousConfidence < range.max || (previousConfidence >= 100 && range.max === 100))) {
+            if (previousConfidence && previousConfidence >= range.min && (previousConfidence < range.max || (previousConfidence === 100 && range.max === 100))) {
                 const marginLeft = indicatorsHTML ? 'ml-1' : 'ml-2';
                 indicatorsHTML += `<span class="${marginLeft} px-1.5 py-0.5 text-xs rounded font-semibold bg-gray-500 text-white" title="Phán đoán ván trước">Trước</span>`;
             }
             
             // Lấy diễn biến của PHIÊN HIỆN TẠI
-            const currentSessionPredictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (p.confidence >= 100 && range.max === 100)));
+            const currentSessionPredictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (p.confidence === 100 && range.max === 100)));
             const displayedPredictions = currentSessionPredictionsForRange.slice(-30);
             let individualBarsHTML = `<div class="flex items-end justify-center gap-px h-5 my-auto overflow-hidden" title="Hiển thị tối đa 30 ván gần nhất (phiên này)">`;
             if (displayedPredictions.length > 0) {
@@ -1123,6 +1124,30 @@ function addResult(result) {
     saveSessions();
     updateAllUI();
 }
+
+function updateLengthPerformanceAndFindOptimal(history, allSessions, newResult) {
+    const session = state.sessions[state.currentSessionId];
+    if (!session.lengthPerformance) session.lengthPerformance = {};
+    const candidates = [];
+    for (let len = 10; len <= 20; len++) {
+        if (history.length < len) continue;
+        const pattern = history.slice(-len);
+        // CẬP NHẬT: Luôn dùng TẤT CẢ lịch sử để tìm độ dài tối ưu
+        const { prediction } = state.matcher.getPredictionForPattern(pattern, Object.values(state.sessions)); 
+        if (prediction) {
+            if (!session.lengthPerformance[len]) session.lengthPerformance[len] = { wins: 0, total: 0 };
+            const stats = session.lengthPerformance[len];
+            stats.total++;
+            if (prediction === newResult) stats.wins++;
+            // Luôn thêm vào candidates để có thể chọn tối ưu dù nó thua
+            candidates.push({ length: len, rate: stats.total > 0 ? stats.wins / stats.total : 0, total: stats.total }); 
+        }
+    }
+    if (candidates.length === 0) return session.optimalLength;
+    candidates.sort((a, b) => b.rate !== a.rate ? b.rate - a.rate : b.total - a.total);
+    return candidates[0].length;
+}
+
 // Sửa lỗi logic hoàn tác (Phần này giữ nguyên từ lần sửa trước)
 function undoLast() {
     if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0) return;
@@ -1652,32 +1677,7 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 </script>
 </body>
 </html>
