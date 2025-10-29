@@ -1576,8 +1576,18 @@ const blob = new Blob([dataToExport], { type: 'application/json' });
 const url = URL.createObjectURL(blob);
 const a = document.createElement('a');
 a.href = url;
-const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-a.download = `BaccaratAnalysis_HistoryOnly_${timestamp}.json`; // Changed filename
+// const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // DÒNG CŨ
+// a.download = `BaccaratAnalysis_HistoryOnly_${timestamp}.json`; // DÒNG CŨ
+
+// --- THAY ĐỔI ---
+const now = new Date();
+const day = String(now.getDate()).padStart(2, '0');
+const month = String(now.getMonth() + 1).padStart(2, '0'); // getMonth() trả về từ 0-11, nên cần +1
+const year = now.getFullYear();
+const filename = `LỊCH SỬ NGÀY ${day} THÁNG ${month} NĂM ${year}.json`;
+a.download = filename;
+// --- KẾT THÚC THAY ĐỔI ---
+
 document.body.appendChild(a);
 a.click();
 document.body.removeChild(a);
@@ -1711,4 +1721,5 @@ document.addEventListener('DOMContentLoaded', initializeApp)
 </script>
 </body>
 </html>
+
 
