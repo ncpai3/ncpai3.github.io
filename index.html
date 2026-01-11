@@ -140,12 +140,20 @@
             margin: 0 1px;
         }
         .final-decision-correct {
-            background-color: #3b82f6;
+            background-color: #3b82f6; /* Xanh dương */
             height: 100%;
         }
         .final-decision-incorrect {
-            background-color: #ef4444;
+            background-color: #ef4444; /* Đỏ */
             height: 40%;
+        }
+        /* Biểu đồ kết hợp trong khối hệ thống */
+        .combined-chart-container {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -347,15 +355,12 @@
                             <span class="text-gray-300">Tỉ lệ khoảng:</span>
                             <span id="ht1-range-accuracy" class="font-bold text-green-400">-</span>
                         </div>
-                        
-                        <!-- Biểu đồ khoảng tỷ lệ -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
                             <div id="ht1-interval-chart" class="history-chart" style="height: 60px;"></div>
                             <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
-                        
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP HT1 -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht1-combined-chart" class="history-chart" style="height: 60px;">
@@ -385,15 +390,12 @@
                             <span class="text-gray-300">Tỉ lệ khoảng:</span>
                             <span id="ht2-range-accuracy" class="font-bold text-green-400">-</span>
                         </div>
-                        
-                        <!-- Biểu đồ khoảng tỷ lệ -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
                             <div id="ht2-interval-chart" class="history-chart" style="height: 60px;"></div>
                             <div id="ht2-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
-                        
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP HT2 -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht2-combined-chart" class="history-chart" style="height: 60px;">
@@ -423,15 +425,12 @@
                             <span class="text-gray-300">Tỉ lệ khoảng:</span>
                             <span id="ht3-range-accuracy" class="font-bold text-green-400">-</span>
                         </div>
-                        
-                        <!-- Biểu đồ khoảng tỷ lệ -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
                             <div id="ht3-interval-chart" class="history-chart" style="height: 60px;"></div>
                             <div id="ht3-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
-                        
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP HT3 -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht3-combined-chart" class="history-chart" style="height: 60px;">
@@ -461,15 +460,12 @@
                             <span class="text-gray-300">Tỉ lệ khoảng:</span>
                             <span id="ht4-range-accuracy" class="font-bold text-green-400">-</span>
                         </div>
-                        
-                        <!-- Biểu đồ khoảng tỷ lệ -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
                             <div id="ht4-interval-chart" class="history-chart" style="height: 60px;"></div>
                             <div id="ht4-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
-                        
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP HT4 -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht4-combined-chart" class="history-chart" style="height: 60px;">
@@ -1835,9 +1831,6 @@
             
             // Update interval chart
             updateIntervalChart(system, details.intervalHistory);
-            
-            // Update combined chart
-            renderCombinedChart(system);
         }
 
         function updateIntervalChart(system, history) {
@@ -2427,7 +2420,7 @@
                     <div class="modal-content text-center">
                         <p class="text-lg text-gray-200">${message}</p>
                         <div class="mt-4">
-                            <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
